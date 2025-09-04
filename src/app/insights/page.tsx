@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Header } from "@/components/layout/Header";
+import { ModernHeader } from "@/components/layout/ModernHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart,
@@ -312,17 +313,17 @@ export default function InsightsPage() {
   const metrics = getInsightMetrics();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
+      <ModernHeader />
       <Sidebar />
 
-      <main className="p-4 pb-20">
+      <main className="p-4 pb-24 lg:pb-20">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
           <div>
-            <h1 className="text-2xl font-bold">Insights</h1>
-            <p className="text-muted-foreground">
-              Understand your spending patterns and financial health
+            <h1 className="text-xl sm:text-2xl font-bold">Insights</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Your spending patterns
             </p>
           </div>
 
@@ -330,18 +331,18 @@ export default function InsightsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Savings Rate
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Target className="h-4 w-4 text-blue-600" />
-                  <span className="text-2xl font-bold">
+                  <span className="text-xl sm:text-2xl font-bold">
                     {savingsRate.toFixed(1)}%
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">
                   Of monthly income
                 </p>
               </CardContent>
@@ -410,31 +411,56 @@ export default function InsightsPage() {
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Monthly Trends */}
-            <Card>
-              <CardHeader>
-                <CardTitle>6-Month Trend</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg">6-Month Trend</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={monthlyTrends}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                    <Legend />
+              <CardContent className="p-2 sm:p-6">
+                <ResponsiveContainer width="100%" height={200} className="sm:h-[300px]">
+                  <LineChart 
+                    data={monthlyTrends}
+                    margin={{ top: 5, right: 5, left: -20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                    <XAxis 
+                      dataKey="month" 
+                      tick={{ fontSize: 10 }}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis 
+                      tick={{ fontSize: 10 }}
+                      tickFormatter={(value) => {
+                        if (value >= 1000000) {
+                          return `${(value / 1000000).toFixed(1)}M`;
+                        } else if (value >= 1000) {
+                          return `${(value / 1000).toFixed(0)}k`;
+                        }
+                        return value;
+                      }}
+                    />
+                    <Tooltip 
+                      formatter={(value: number) => formatCurrency(value)}
+                      contentStyle={{ fontSize: '12px' }}
+                    />
+                    <Legend 
+                      wrapperStyle={{ fontSize: '11px' }}
+                      iconSize={10}
+                    />
                     <Line
                       type="monotone"
                       dataKey="income"
                       stroke="#10b981"
                       strokeWidth={2}
+                      dot={false}
                     />
                     <Line
                       type="monotone"
                       dataKey="expenses"
                       stroke="#ef4444"
                       strokeWidth={2}
+                      dot={false}
                     />
                     <Line
                       type="monotone"
@@ -442,6 +468,7 @@ export default function InsightsPage() {
                       stroke="#3b82f6"
                       strokeWidth={2}
                       strokeDasharray="5 5"
+                      dot={false}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -449,56 +476,129 @@ export default function InsightsPage() {
             </Card>
 
             {/* Top Spending Categories */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Top Spending Categories</CardTitle>
+            <Card className="overflow-hidden">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg">Top Categories</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={topCategories}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percentage }) =>
-                        `${name} ${percentage.toFixed(0)}%`
-                      }
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {topCategories.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
+              <CardContent className="p-2 sm:p-6">
+                {topCategories.length > 0 ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={180} className="sm:hidden">
+                      <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                        <Pie
+                          data={topCategories}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={60}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {topCategories.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value: number) => formatCurrency(value)}
+                          contentStyle={{ fontSize: '12px' }}
                         />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <ResponsiveContainer width="100%" height={300} className="hidden sm:block">
+                      <PieChart>
+                        <Pie
+                          data={topCategories}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percentage }) =>
+                            `${name} ${percentage.toFixed(0)}%`
+                          }
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {topCategories.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={COLORS[index % COLORS.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value: number) => formatCurrency(value)} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    {/* Mobile Legend */}
+                    <div className="grid grid-cols-2 gap-2 mt-3 sm:hidden">
+                      {topCategories.slice(0, 4).map((item, index) => (
+                        <div key={item.name} className="flex items-center gap-1 text-xs">
+                          <div 
+                            className="w-3 h-3 rounded-full flex-shrink-0" 
+                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                          />
+                          <span className="truncate">{item.name}</span>
+                          <span className="text-muted-foreground">
+                            {item.percentage.toFixed(0)}%
+                          </span>
+                        </div>
                       ))}
-                    </Pie>
-                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                  </PieChart>
-                </ResponsiveContainer>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center h-[180px] sm:h-[300px] text-muted-foreground text-sm">
+                    No data available
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Category Comparison */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Category Spending Comparison</CardTitle>
+            <Card className="lg:col-span-2 overflow-hidden">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg">Spending Comparison</CardTitle>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={categorySpending}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="category" />
-                    <YAxis />
-                    <Tooltip formatter={(value: number) => formatCurrency(value)} />
-                    <Legend />
-                    <Bar dataKey="lastMonth" fill="#94a3b8" />
-                    <Bar dataKey="thisMonth" fill="#3b82f6" />
-                    <Bar dataKey="average" fill="#10b981" />
-                  </BarChart>
-                </ResponsiveContainer>
+              <CardContent className="p-2 sm:p-6">
+                <div className="overflow-x-auto">
+                  <ResponsiveContainer width="100%" height={200} className="sm:h-[300px]" minWidth={300}>
+                    <BarChart 
+                      data={categorySpending}
+                      margin={{ top: 5, right: 5, left: -20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                      <XAxis 
+                        dataKey="category" 
+                        tick={{ fontSize: 10 }}
+                        interval={0}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 10 }}
+                        tickFormatter={(value) => {
+                          if (value >= 1000) {
+                            return `${(value / 1000).toFixed(0)}k`;
+                          }
+                          return value;
+                        }}
+                      />
+                      <Tooltip 
+                        formatter={(value: number) => formatCurrency(value)}
+                        contentStyle={{ fontSize: '12px' }}
+                      />
+                      <Legend 
+                        wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+                        iconSize={10}
+                      />
+                      <Bar dataKey="lastMonth" fill="#94a3b8" />
+                      <Bar dataKey="thisMonth" fill="#3b82f6" />
+                      <Bar dataKey="average" fill="#10b981" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -577,6 +677,11 @@ export default function InsightsPage() {
           </Card>
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden">
+        <MobileBottomNav />
+      </div>
     </div>
   );
 }

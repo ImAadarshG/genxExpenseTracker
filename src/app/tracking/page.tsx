@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Header } from "@/components/layout/Header";
+import { ModernHeader } from "@/components/layout/ModernHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -230,33 +231,34 @@ function TrackingContent() {
   const trendData = getDailyTrend();
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
+      <ModernHeader />
       <Sidebar />
 
-      <main className="p-4 pb-20">
+      <main className="p-4 pb-24 lg:pb-20">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header with Period Selector */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-4">
             <div>
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-xl sm:text-2xl font-bold">
                 {view === "monthly" ? "Monthly" : "Weekly"} Tracking
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Analyze your financial patterns
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between gap-2">
               <Button
                 variant="outline"
-                size="icon"
+                size="sm"
                 onClick={() => navigatePeriod("prev")}
+                className="h-8 w-8 p-0"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="px-4 py-2 bg-accent rounded-lg min-w-[150px] text-center">
+              <div className="px-3 py-1.5 bg-accent rounded-lg flex-1 text-center text-sm">
                 {view === "monthly"
-                  ? format(selectedDate, "MMMM yyyy")
+                  ? format(selectedDate, "MMM yyyy")
                   : `${format(
                       startOfWeek(selectedDate, { weekStartsOn: 0 }),
                       "MMM d"
@@ -267,14 +269,19 @@ function TrackingContent() {
               </div>
               <Button
                 variant="outline"
-                size="icon"
+                size="sm"
                 onClick={() => navigatePeriod("next")}
+                className="h-8 w-8 p-0"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
-              <Button variant="outline" onClick={exportData}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={exportData}
+                className="h-8 px-2"
+              >
+                <Download className="h-3 w-3" />
               </Button>
             </div>
           </div>
@@ -348,44 +355,86 @@ function TrackingContent() {
               </div>
 
               {/* Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Category Breakdown Pie Chart */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Expense Categories</CardTitle>
+                <Card className="overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base sm:text-lg">Expense Categories</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-2 sm:p-6">
                     {categoryData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                          <Pie
-                            data={categoryData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            label={({ name, percent }) =>
-                              `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
-                            }
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                          >
-                            {categoryData.map((entry, index) => (
-                              <Cell
-                                key={`cell-${index}`}
-                                fill={COLORS[index % COLORS.length]}
+                      <>
+                        <ResponsiveContainer width="100%" height={200} className="sm:hidden">
+                          <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
+                            <Pie
+                              data={categoryData}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              outerRadius={60}
+                              fill="#8884d8"
+                              dataKey="value"
+                            >
+                              {categoryData.map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={COLORS[index % COLORS.length]}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip
+                              formatter={(value: number) =>
+                                formatCurrency(value)
+                              }
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        <ResponsiveContainer width="100%" height={300} className="hidden sm:block">
+                          <PieChart>
+                            <Pie
+                              data={categoryData}
+                              cx="50%"
+                              cy="50%"
+                              labelLine={false}
+                              label={({ name, percent }) =>
+                                `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                              }
+                              outerRadius={80}
+                              fill="#8884d8"
+                              dataKey="value"
+                            >
+                              {categoryData.map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={COLORS[index % COLORS.length]}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip
+                              formatter={(value: number) =>
+                                formatCurrency(value)
+                              }
+                            />
+                          </PieChart>
+                        </ResponsiveContainer>
+                        {/* Mobile Legend */}
+                        <div className="grid grid-cols-2 gap-2 mt-4 sm:hidden">
+                          {categoryData.slice(0, 4).map((item, index) => (
+                            <div key={item.name} className="flex items-center gap-1 text-xs">
+                              <div 
+                                className="w-3 h-3 rounded-full flex-shrink-0" 
+                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
                               />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            formatter={(value: number) =>
-                              formatCurrency(value)
-                            }
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
+                              <span className="truncate">{item.name}</span>
+                              <span className="text-muted-foreground">
+                                {Math.round((item.value / categoryData.reduce((a, b) => a + b.value, 0)) * 100)}%
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
                     ) : (
-                      <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                      <div className="flex items-center justify-center h-[200px] sm:h-[300px] text-muted-foreground text-sm">
                         No expense data available
                       </div>
                     )}
@@ -393,41 +442,62 @@ function TrackingContent() {
                 </Card>
 
                 {/* Trend Line Chart */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>
+                <Card className="overflow-hidden">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base sm:text-lg">
                       {view === "monthly" ? "Weekly" : "Daily"} Trend
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-2 sm:p-6">
                     {trendData.length > 0 ? (
-                      <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={trendData}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="date" />
-                          <YAxis />
+                      <ResponsiveContainer width="100%" height={200} className="sm:h-[300px]">
+                        <LineChart 
+                          data={trendData}
+                          margin={{ top: 5, right: 5, left: -20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
+                          <XAxis 
+                            dataKey="date" 
+                            tick={{ fontSize: 10 }}
+                            interval="preserveStartEnd"
+                          />
+                          <YAxis 
+                            tick={{ fontSize: 10 }}
+                            tickFormatter={(value) => {
+                              if (value >= 1000) {
+                                return `${(value / 1000).toFixed(0)}k`;
+                              }
+                              return value;
+                            }}
+                          />
                           <Tooltip
                             formatter={(value: number) =>
                               formatCurrency(value)
                             }
+                            contentStyle={{ fontSize: '12px' }}
                           />
-                          <Legend />
+                          <Legend 
+                            wrapperStyle={{ fontSize: '12px' }}
+                            iconSize={12}
+                          />
                           <Line
                             type="monotone"
                             dataKey="income"
                             stroke="#10b981"
                             strokeWidth={2}
+                            dot={false}
                           />
                           <Line
                             type="monotone"
                             dataKey="expenses"
                             stroke="#ef4444"
                             strokeWidth={2}
+                            dot={false}
                           />
                         </LineChart>
                       </ResponsiveContainer>
                     ) : (
-                      <div className="flex items-center justify-center h-[300px] text-muted-foreground">
+                      <div className="flex items-center justify-center h-[200px] sm:h-[300px] text-muted-foreground text-sm">
                         No trend data available
                       </div>
                     )}
@@ -498,6 +568,11 @@ function TrackingContent() {
           </Tabs>
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden">
+        <MobileBottomNav />
+      </div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Header } from "@/components/layout/Header";
+import { ModernHeader } from "@/components/layout/ModernHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -158,21 +159,21 @@ export default function MoneyLentPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
+      <ModernHeader />
       <Sidebar />
 
-      <main className="p-4 pb-20">
+      <main className="p-4 pb-24 lg:pb-20">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="space-y-4">
             <div>
-              <h1 className="text-2xl font-bold">Money Lent Tracker</h1>
-              <p className="text-muted-foreground">
-                Keep track of money you&apos;ve lent to others
+              <h1 className="text-xl sm:text-2xl font-bold">Money Lent</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Track money lent to others
               </p>
             </div>
-            <Button onClick={() => setModalOpen(true)}>
+            <Button onClick={() => setModalOpen(true)} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Record
             </Button>
@@ -455,6 +456,11 @@ export default function MoneyLentPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden">
+        <MobileBottomNav />
+      </div>
     </div>
   );
 }

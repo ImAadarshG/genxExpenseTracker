@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Header } from "@/components/layout/Header";
+import { ModernHeader } from "@/components/layout/ModernHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +23,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { User, Lock, Bell, DollarSign, LogOut, Trash2, Download, Upload } from "lucide-react";
 import { motion } from "framer-motion";
-import { CloudSyncSettings } from "@/components/CloudSyncSettings";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -210,30 +210,29 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
+      <ModernHeader />
       <Sidebar />
 
-      <main className="p-4 pb-20">
+      <main className="p-4 pb-24 lg:pb-20">
         <div className="max-w-4xl mx-auto space-y-6">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-2xl font-bold">Settings</h1>
-            <p className="text-muted-foreground">
-              Manage your account and preferences
+            <h1 className="text-xl sm:text-2xl font-bold">Settings</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Manage your preferences
             </p>
           </motion.div>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="preferences">Preferences</TabsTrigger>
-              <TabsTrigger value="security">Security</TabsTrigger>
-              <TabsTrigger value="data">Data</TabsTrigger>
-              <TabsTrigger value="cloud">Cloud</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4 h-auto">
+              <TabsTrigger value="profile" className="text-xs py-2">Profile</TabsTrigger>
+              <TabsTrigger value="preferences" className="text-xs py-2">Preferences</TabsTrigger>
+              <TabsTrigger value="security" className="text-xs py-2">Security</TabsTrigger>
+              <TabsTrigger value="data" className="text-xs py-2">Data</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-4 mt-6">
@@ -524,12 +523,14 @@ export default function SettingsPage() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="cloud" className="space-y-4 mt-6">
-              <CloudSyncSettings />
-            </TabsContent>
           </Tabs>
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="lg:hidden">
+        <MobileBottomNav />
+      </div>
     </div>
   );
 }
