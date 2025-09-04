@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { User, Lock, Bell, DollarSign, LogOut, Trash2, Download, Upload } from "lucide-react";
 import { motion } from "framer-motion";
+import { CloudSyncSettings } from "@/components/CloudSyncSettings";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -47,6 +48,7 @@ export default function SettingsPage() {
   });
 
   useEffect(() => {
+    // Redirect to login if not authenticated
     if (!user) {
       router.push("/login");
     }
@@ -226,11 +228,12 @@ export default function SettingsPage() {
           </motion.div>
 
           <Tabs defaultValue="profile" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="preferences">Preferences</TabsTrigger>
               <TabsTrigger value="security">Security</TabsTrigger>
               <TabsTrigger value="data">Data</TabsTrigger>
+              <TabsTrigger value="cloud">Cloud</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="space-y-4 mt-6">
@@ -519,6 +522,10 @@ export default function SettingsPage() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="cloud" className="space-y-4 mt-6">
+              <CloudSyncSettings />
             </TabsContent>
           </Tabs>
         </div>

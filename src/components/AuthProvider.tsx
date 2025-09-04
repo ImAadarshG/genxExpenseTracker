@@ -10,7 +10,7 @@ const publicPaths = ["/login", "/register"];
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAuthenticated } = useStore();
+  const { isAuthenticated } = useStore();
 
   useEffect(() => {
     // Create demo user if no users exist
@@ -34,13 +34,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Redirect logic based on authentication
-    const isPublicPath = publicPaths.includes(pathname);
+    // Authentication is REQUIRED - users must login to access the app
+    const requireAuth = true; // ← LOGIN IS REQUIRED
     
-    if (!isAuthenticated && !isPublicPath) {
-      router.push("/login");
-    } else if (isAuthenticated && isPublicPath) {
-      router.push("/");
+    if (requireAuth) {
+      const isPublicPath = publicPaths.includes(pathname);
+      
+      if (!isAuthenticated && !isPublicPath) {
+        router.push("/login");
+      } else if (isAuthenticated && isPublicPath) {
+        router.push("/");
+      }
     }
   }, [isAuthenticated, pathname, router]);
 
