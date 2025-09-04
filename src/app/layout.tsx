@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
-import { AuthProvider } from "@/components/AuthProvider";
+// import { AuthProvider } from "@/components/AuthProvider"; // Uncomment to enable authentication
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,9 +38,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background`}
       >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        {children}
         <ServiceWorkerRegistration />
         <Toaster
           position="top-center"

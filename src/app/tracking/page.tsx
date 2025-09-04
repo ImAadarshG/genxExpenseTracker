@@ -1,19 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   PieChart,
   Pie,
@@ -26,8 +19,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  BarChart,
-  Bar,
 } from "recharts";
 import { dbHelpers } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -36,8 +27,6 @@ import {
   formatDate,
   getStartOfMonth,
   getEndOfMonth,
-  getStartOfWeek,
-  getEndOfWeek,
   EXPENSE_CATEGORIES,
 } from "@/lib/utils";
 import { format, startOfWeek, endOfWeek, eachDayOfInterval } from "date-fns";
@@ -56,7 +45,7 @@ const COLORS = [
   "#4BC0C0",
 ];
 
-export default function TrackingPage() {
+function TrackingContent() {
   const searchParams = useSearchParams();
   const view = searchParams.get("view") || "monthly";
   
@@ -375,7 +364,7 @@ export default function TrackingPage() {
                             cy="50%"
                             labelLine={false}
                             label={({ name, percent }) =>
-                              `${name} ${(percent * 100).toFixed(0)}%`
+                              `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
                             }
                             outerRadius={80}
                             fill="#8884d8"
@@ -510,5 +499,20 @@ export default function TrackingPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function TrackingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading tracking data...</p>
+        </div>
+      </div>
+    }>
+      <TrackingContent />
+    </Suspense>
   );
 }

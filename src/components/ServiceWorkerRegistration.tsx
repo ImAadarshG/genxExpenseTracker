@@ -68,12 +68,14 @@ export function ServiceWorkerRegistration() {
               action: {
                 label: "Install",
                 onClick: async () => {
-                  deferredPrompt.prompt();
-                  const { outcome } = await deferredPrompt.userChoice;
-                  if (outcome === "accepted") {
-                    toast.success("App installed successfully!");
+                  if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === "accepted") {
+                      toast.success("App installed successfully!");
+                    }
+                    deferredPrompt = null;
                   }
-                  deferredPrompt = null;
                 },
               },
             });
