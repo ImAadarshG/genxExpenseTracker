@@ -76,8 +76,11 @@ export interface Income {
 export interface Investment {
   id?: number;
   date: Date;
+  name: string;
   type: InvestmentType;
   amount: number;
+  returnPercentage?: number;
+  riskLevel?: 'low' | 'medium' | 'high';
   description?: string;
   createdAt: Date;
   updatedAt: Date;
