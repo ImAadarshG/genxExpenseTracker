@@ -30,7 +30,6 @@ export function AddInvestmentForm() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
-    name: "",
     type: "" as InvestmentType,
     amount: "",
     description: "",
@@ -47,7 +46,6 @@ export function AddInvestmentForm() {
     try {
       await dbHelpers.addInvestment({
         date: new Date(formData.date),
-        name: formData.name || 'Investment',
         type: formData.type,
         amount: parseFloat(formData.amount),
         description: formData.description,
@@ -57,7 +55,6 @@ export function AddInvestmentForm() {
       setAddInvestmentModalOpen(false);
       setFormData({
         date: new Date().toISOString().split("T")[0],
-        name: "",
         type: "" as InvestmentType,
         amount: "",
         description: "",
@@ -91,18 +88,6 @@ export function AddInvestmentForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="name">Investment Name</Label>
-            <Input
-              id="name"
-              placeholder="e.g. Tesla Stock, SBI Mutual Fund"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="type">Investment Type *</Label>
             <Select
               value={formData.type}
@@ -116,6 +101,7 @@ export function AddInvestmentForm() {
               <SelectContent>
                 {INVESTMENT_TYPES.map((type) => (
                   <SelectItem key={type.value} value={type.value}>
+                    <span className="mr-2">{type.icon}</span>
                     {type.label}
                   </SelectItem>
                 ))}

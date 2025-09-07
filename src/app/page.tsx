@@ -10,20 +10,29 @@ import { AddExpenseForm } from "@/components/forms/AddExpenseForm";
 import { AddIncomeForm } from "@/components/forms/AddIncomeForm";
 import { AddInvestmentForm } from "@/components/forms/AddInvestmentForm";
 import { AddLentMoneyForm } from "@/components/forms/AddLentMoneyForm";
-import { RecentEntries } from "@/components/dashboard/RecentEntries";
+import { EditExpenseForm } from "@/components/forms/EditExpenseForm";
+import { EditDeleteMenu } from "@/components/ui/EditDeleteMenu";
+import { EditModal } from "@/components/ui/EditModal";
 import { dbHelpers } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
-import type { DashboardStats } from "@/types";
+import type { DashboardStats, Expense } from "@/types";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { 
+  Receipt,
+  ChevronRight,
   Sparkles,
   Brain,
   Zap
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useStore } from "@/store/useStore";
 
 export default function HomePage() {
+  const router = useRouter();
   const { user } = useStore();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     monthlyExpenses: 0,
     dailyExpenses: 0,
@@ -44,7 +53,78 @@ export default function HomePage() {
     }
   }, [liveStats]);
 
-  // No need for recent transactions here as we're using RecentEntries component
+  // Get recent transactions
+  const recentTransactions = useLiveQuery(async () => {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
+    const expenses = await dbHelpers.getExpensesByDateRange(
+      thirtyDaysAgo,
+      new Date()
+    );
+    return expenses
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5);
+  });
+
+  const getCategoryEmoji = (category: string) => {
+    const emojiMap: { [key: string]: string } = {
+      'food_dining': '🍔',
+      'shopping': '🛍️',
+      'transportation': '🚗',
+      'entertainment': '🎬',
+      'bills_utilities': '📱',
+      'healthcare': '🏥',
+      'education': '📚',
+      'travel': '✈️',
+      'personal_care': '💅',
+      'groceries': '🛒',
+      'rent_mortgage': '🏠',
+      'insurance': '🛡️',
+      'gifts_donations': '🎁',
+      'others': '💳'
+    };
+    return emojiMap[category] || '💳';
+  };
+
+  const getPaymentMethodLabel = (method: string) => {
+    const labelMap: { [key: string]: string } = {
+      'credit_card': 'Card',
+      'debit_card': 'Debit',
+      'cash': 'Cash',
+      'bank_transfer': 'Transfer',
+      'upi': 'UPI',
+      'wallet': 'Wallet',
+      'other': 'Other'
+    };
+    return labelMap[method] || 'Other';
+  };
+
+  const handleEditExpense = (expense: Expense) => {
+    setEditingExpense(expense);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteExpense = async (id: number) => {
+    if (confirm('Are you sure you want to delete this expense?')) {
+      try {
+        await dbHelpers.deleteExpense(id);
+      } catch (error) {
+        console.error('Error deleting expense:', error);
+      }
+    }
+  };
+
+  const handleUpdateExpense = async (updatedExpense: Partial<Expense>) => {
+    if (!editingExpense) return;
+    
+    try {
+      await dbHelpers.updateExpense(editingExpense.id!, updatedExpense);
+      setIsEditModalOpen(false);
+      setEditingExpense(null);
+    } catch (error) {
+      console.error('Error updating expense:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50">
@@ -156,8 +236,92 @@ export default function HomePage() {
           <ModernStatsCards stats={stats} />
         </div>
 
-        {/* Recent Entries with Edit/Delete */}
-        <RecentEntries />
+        {/* Recent Transactions */}
+        {recentTransactions && recentTransactions.length > 0 && (
+          <div className="mx-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+              {/* Header */}
+              <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Receipt className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+                  <h2 className="text-base sm:text-lg font-bold text-gray-900">Recent</h2>
+                </div>
+                <button
+                  onClick={() => router.push("/tracking")}
+                  className="flex items-center gap-0.5 text-xs sm:text-sm text-purple-600 font-medium"
+                >
+                  See all
+                  <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                </button>
+              </div>
+
+              {/* Transactions List */}
+              <div className="divide-y divide-gray-50">
+                {recentTransactions.slice(0, 3).map((transaction, index) => (
+                  <motion.div
+                    key={transaction.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="flex items-center justify-between p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      {/* Icon */}
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-100 flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                        {getCategoryEmoji(transaction.category)}
+                      </div>
+                      
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 text-sm truncate">
+                          {transaction.title.length > 20 
+                            ? `${transaction.title.substring(0, 20)}...` 
+                            : transaction.title}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-[10px] sm:text-xs text-gray-500">
+                            {formatDate(new Date(transaction.date))}
+                          </span>
+                          <span className="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full bg-purple-50 text-purple-600 font-medium">
+                            {getPaymentMethodLabel(transaction.paymentMethod)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Amount and Actions */}
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-red-600 text-sm sm:text-base flex-shrink-0">
+                        -{formatCurrency(transaction.amount).length > 10 
+                          ? `${formatCurrency(transaction.amount).substring(0, 10)}...` 
+                          : formatCurrency(transaction.amount)}
+                      </p>
+                      <EditDeleteMenu
+                        onEdit={() => handleEditExpense(transaction)}
+                        onDelete={() => handleDeleteExpense(transaction.id!)}
+                      />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {(!recentTransactions || recentTransactions.length === 0) && (
+          <div className="mx-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 text-center">
+              <div className="text-4xl sm:text-5xl mb-3 sm:mb-4">📊</div>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 sm:mb-2">
+                No transactions yet
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
+                Start tracking your expenses by tapping the + button
+              </p>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Mobile Bottom Navigation */}
@@ -175,6 +339,27 @@ export default function HomePage() {
       <AddIncomeForm />
       <AddInvestmentForm />
       <AddLentMoneyForm />
+      
+      {/* Edit Modal */}
+      <EditModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingExpense(null);
+        }}
+        title="Edit Expense"
+      >
+        {editingExpense && (
+          <EditExpenseForm
+            expense={editingExpense}
+            onSubmit={handleUpdateExpense}
+            onCancel={() => {
+              setIsEditModalOpen(false);
+              setEditingExpense(null);
+            }}
+          />
+        )}
+      </EditModal>
     </div>
   );
 }

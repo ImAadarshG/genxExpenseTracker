@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { ModernHeader } from "@/components/layout/ModernHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { EditDeleteMenu } from "@/components/ui/EditDeleteMenu";
+import { EditModal } from "@/components/ui/EditModal";
+import { EditLentMoneyForm } from "@/components/forms/EditLentMoneyForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -247,28 +250,20 @@ export default function MoneyLentPage() {
                             Given on {formatDate(new Date(record.givenDate))}
                           </p>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-2">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleMarkReturned(record)}
+                            className="text-green-600 hover:text-green-700"
                           >
                             <Check className="h-4 w-4" />
+                            <span className="ml-1">Returned</span>
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEdit(record)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDelete(record.id!)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
+                          <EditDeleteMenu
+                            onEdit={() => handleEdit(record)}
+                            onDelete={() => handleDelete(record.id!)}
+                          />
                         </div>
                       </div>
                     </motion.div>
@@ -311,13 +306,10 @@ export default function MoneyLentPage() {
                               : "N/A"}
                           </p>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete(record.id!)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                        <EditDeleteMenu
+                          onEdit={() => handleEdit(record)}
+                          onDelete={() => handleDelete(record.id!)}
+                        />
                       </div>
                     </motion.div>
                   ))}

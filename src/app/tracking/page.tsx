@@ -5,6 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { ModernHeader } from "@/components/layout/ModernHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
+import { EditDeleteMenu } from "@/components/ui/EditDeleteMenu";
+import { EditModal } from "@/components/ui/EditModal";
+import { EditExpenseForm } from "@/components/forms/EditExpenseForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -51,6 +54,8 @@ function TrackingContent() {
   const view = searchParams.get("view") || "monthly";
   
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [monthlyData, setMonthlyData] = useState<{
     expenses: Expense[];
     incomes: Income[];
@@ -216,6 +221,43 @@ function TrackingContent() {
       "yyyy-MM-dd"
     )}.json`;
     link.click();
+  };
+
+  const handleEditExpense = (expense: Expense) => {
+    setEditingExpense(expense);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteExpense = async (id: number) => {
+    if (confirm('Are you sure you want to delete this expense?')) {
+      try {
+        await dbHelpers.deleteExpense(id);
+      } catch (error) {
+        console.error('Error deleting expense:', error);
+      }
+    }
+  };
+
+  const handleDeleteIncome = async (id: number) => {
+    if (confirm('Are you sure you want to delete this income?')) {
+      try {
+        await dbHelpers.deleteIncome(id);
+      } catch (error) {
+        console.error('Error deleting income:', error);
+      }
+    }
+  };
+
+  const handleUpdateExpense = async (updatedExpense: Partial<Expense>) => {
+    if (!editingExpense) return;
+    
+    try {
+      await dbHelpers.updateExpense(editingExpense.id!, updatedExpense);
+      setIsEditModalOpen(false);
+      setEditingExpense(null);
+    } catch (error) {
+      console.error('Error updating expense:', error);
+    }
   };
 
   const currentData = view === "monthly" ? monthlyData : weeklyData;
@@ -534,9 +576,15 @@ function TrackingContent() {
                               }
                             </p>
                           </div>
-                          <p className="font-semibold text-red-600">
-                            -{formatCurrency(expense.amount)}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-red-600">
+                              -{formatCurrency(expense.amount)}
+                            </p>
+                            <EditDeleteMenu
+                              onEdit={() => handleEditExpense(expense)}
+                              onDelete={() => handleDeleteExpense(expense.id!)}
+                            />
+                          </div>
                         </div>
                       ))}
                     {currentData.incomes
@@ -556,9 +604,15 @@ function TrackingContent() {
                               {formatDate(new Date(income.date))}
                             </p>
                           </div>
-                          <p className="font-semibold text-green-600">
-                            +{formatCurrency(income.amount)}
-                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-green-600">
+                              +{formatCurrency(income.amount)}
+                            </p>
+                            <EditDeleteMenu
+                              onEdit={() => console.log('Edit income not implemented yet')}
+                              onDelete={() => handleDeleteIncome(income.id!)}
+                            />
+                          </div>
                         </div>
                       ))}
                   </div>
@@ -573,6 +627,27 @@ function TrackingContent() {
       <div className="lg:hidden">
         <MobileBottomNav />
       </div>
+
+      {/* Edit Modal */}
+      <EditModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingExpense(null);
+        }}
+        title="Edit Expense"
+      >
+        {editingExpense && (
+          <EditExpenseForm
+            expense={editingExpense}
+            onSubmit={handleUpdateExpense}
+            onCancel={() => {
+              setIsEditModalOpen(false);
+              setEditingExpense(null);
+            }}
+          />
+        )}
+      </EditModal>
     </div>
   );
 }

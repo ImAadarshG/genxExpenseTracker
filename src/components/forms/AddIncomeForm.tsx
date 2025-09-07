@@ -151,6 +151,7 @@ export function AddIncomeForm() {
               <SelectContent>
                 {INCOME_CATEGORIES.map((category) => (
                   <SelectItem key={category.value} value={category.value}>
+                    <span className="mr-2">{category.icon}</span>
                     {category.label}
                   </SelectItem>
                 ))}

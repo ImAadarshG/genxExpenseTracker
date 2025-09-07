@@ -112,6 +112,7 @@ export function AddExpenseForm() {
                       : "hover:bg-accent"
                   }`}
                 >
+                  <span className="mr-1">{method.icon}</span>
                   <span className="text-sm">{method.label}</span>
                 </button>
               ))}
