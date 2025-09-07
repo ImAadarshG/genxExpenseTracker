@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Expense } from "@/types";
+import type { Expense, ExpenseCategory, PaymentMethod } from "@/types";
 
 interface EditExpenseFormProps {
   expense: Expense;
@@ -35,8 +35,8 @@ export function EditExpenseForm({ expense, onSubmit, onCancel }: EditExpenseForm
     onSubmit({
       title: formData.title,
       amount: parseFloat(formData.amount),
-      category: formData.category,
-      paymentMethod: formData.paymentMethod,
+      category: formData.category as ExpenseCategory,
+      paymentMethod: formData.paymentMethod as PaymentMethod,
       date: new Date(formData.date),
       description: formData.description,
     });
@@ -68,7 +68,7 @@ export function EditExpenseForm({ expense, onSubmit, onCancel }: EditExpenseForm
 
       <div>
         <Label htmlFor="category">Category</Label>
-        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+        <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as ExpenseCategory })}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -93,7 +93,7 @@ export function EditExpenseForm({ expense, onSubmit, onCancel }: EditExpenseForm
 
       <div>
         <Label htmlFor="paymentMethod">Payment Method</Label>
-        <Select value={formData.paymentMethod} onValueChange={(value) => setFormData({ ...formData, paymentMethod: value })}>
+        <Select value={formData.paymentMethod} onValueChange={(value) => setFormData({ ...formData, paymentMethod: value as PaymentMethod })}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>

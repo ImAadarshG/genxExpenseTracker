@@ -5,8 +5,6 @@ import { ModernHeader } from "@/components/layout/ModernHeader";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { EditDeleteMenu } from "@/components/ui/EditDeleteMenu";
-import { EditModal } from "@/components/ui/EditModal";
-import { EditLentMoneyForm } from "@/components/forms/EditLentMoneyForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,7 +28,7 @@ import { dbHelpers } from "@/lib/db";
 import { useLiveQuery } from "dexie-react-hooks";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
-import { Plus, Check, X, Clock } from "lucide-react";
+import { Plus, Check, Clock } from "lucide-react";
 import { motion } from "framer-motion";
 import type { LentMoney, LentMoneyStatus } from "@/types";
 

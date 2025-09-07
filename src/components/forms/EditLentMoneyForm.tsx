@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { LentMoney } from "@/types";
+import type { LentMoney, LentMoneyStatus } from "@/types";
 
 interface EditLentMoneyFormProps {
   lentMoney: LentMoney;
@@ -22,38 +22,38 @@ interface EditLentMoneyFormProps {
 
 export function EditLentMoneyForm({ lentMoney, onSubmit, onCancel }: EditLentMoneyFormProps) {
   const [formData, setFormData] = useState({
-    borrowerName: lentMoney.borrowerName,
+    name: lentMoney.name,
     amount: lentMoney.amount.toString(),
-    purpose: lentMoney.purpose || '',
-    lentDate: new Date(lentMoney.lentDate).toISOString().split('T')[0],
-    expectedReturnDate: lentMoney.expectedReturnDate 
-      ? new Date(lentMoney.expectedReturnDate).toISOString().split('T')[0]
+    reason: lentMoney.reason || '',
+    givenDate: new Date(lentMoney.givenDate).toISOString().split('T')[0],
+    returnDate: lentMoney.returnDate 
+      ? new Date(lentMoney.returnDate).toISOString().split('T')[0]
       : '',
     status: lentMoney.status,
-    notes: lentMoney.notes || '',
+    comment: lentMoney.comment || '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
-      borrowerName: formData.borrowerName,
+      name: formData.name,
       amount: parseFloat(formData.amount),
-      purpose: formData.purpose,
-      lentDate: new Date(formData.lentDate),
-      expectedReturnDate: formData.expectedReturnDate ? new Date(formData.expectedReturnDate) : undefined,
+      reason: formData.reason,
+      givenDate: new Date(formData.givenDate),
+      returnDate: formData.returnDate ? new Date(formData.returnDate) : undefined,
       status: formData.status as 'pending' | 'returned',
-      notes: formData.notes,
+      comment: formData.comment,
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="borrowerName">Borrower Name</Label>
+        <Label htmlFor="name">Borrower Name</Label>
         <Input
-          id="borrowerName"
-          value={formData.borrowerName}
-          onChange={(e) => setFormData({ ...formData, borrowerName: e.target.value })}
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           required
         />
       </div>
@@ -71,39 +71,39 @@ export function EditLentMoneyForm({ lentMoney, onSubmit, onCancel }: EditLentMon
       </div>
 
       <div>
-        <Label htmlFor="purpose">Purpose (Optional)</Label>
+        <Label htmlFor="reason">Reason (Optional)</Label>
         <Input
-          id="purpose"
-          value={formData.purpose}
-          onChange={(e) => setFormData({ ...formData, purpose: e.target.value })}
+          id="reason"
+          value={formData.reason}
+          onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
           placeholder="What was it for?"
         />
       </div>
 
       <div>
-        <Label htmlFor="lentDate">Lent Date</Label>
+        <Label htmlFor="givenDate">Given Date</Label>
         <Input
-          id="lentDate"
+          id="givenDate"
           type="date"
-          value={formData.lentDate}
-          onChange={(e) => setFormData({ ...formData, lentDate: e.target.value })}
+          value={formData.givenDate}
+          onChange={(e) => setFormData({ ...formData, givenDate: e.target.value })}
           required
         />
       </div>
 
       <div>
-        <Label htmlFor="expectedReturnDate">Expected Return Date (Optional)</Label>
+        <Label htmlFor="returnDate">Return Date (Optional)</Label>
         <Input
-          id="expectedReturnDate"
+          id="returnDate"
           type="date"
-          value={formData.expectedReturnDate}
-          onChange={(e) => setFormData({ ...formData, expectedReturnDate: e.target.value })}
+          value={formData.returnDate}
+          onChange={(e) => setFormData({ ...formData, returnDate: e.target.value })}
         />
       </div>
 
       <div>
         <Label htmlFor="status">Status</Label>
-        <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+        <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value as LentMoneyStatus })}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -115,12 +115,12 @@ export function EditLentMoneyForm({ lentMoney, onSubmit, onCancel }: EditLentMon
       </div>
 
       <div>
-        <Label htmlFor="notes">Notes (Optional)</Label>
+        <Label htmlFor="comment">Comment (Optional)</Label>
         <Textarea
-          id="notes"
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          placeholder="Additional notes..."
+          id="comment"
+          value={formData.comment}
+          onChange={(e) => setFormData({ ...formData, comment: e.target.value })}
+          placeholder="Additional comments..."
           className="resize-none"
         />
       </div>
